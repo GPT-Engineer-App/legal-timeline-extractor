@@ -5,25 +5,39 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Timeline } from '../components/Timeline';
 import { AnalysisResults } from '../components/AnalysisResults';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const [documents, setDocuments] = useState([]);
+  const [textInput, setTextInput] = useState('');
   const [timeline, setTimeline] = useState([]);
   const [analysisResults, setAnalysisResults] = useState(null);
+  const [error, setError] = useState('');
 
   const handleFileUpload = (event) => {
-    // TODO: Implement file upload logic
-    console.log("File uploaded:", event.target.files[0]);
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setDocuments([...documents, file]);
+      setError('');
+    } else {
+      setError('Please upload a valid PDF file.');
+    }
   };
 
   const handleTextInput = (event) => {
-    // TODO: Implement text input logic
-    console.log("Text input:", event.target.value);
+    setTextInput(event.target.value);
   };
 
   const handleAnalyze = () => {
-    // TODO: Implement document analysis logic
-    console.log("Analyzing documents...");
+    if (documents.length === 0 && !textInput.trim()) {
+      setError('Please upload a PDF or enter text before analyzing.');
+      return;
+    }
+
+    // TODO: Implement actual document analysis logic
+    console.log("Analyzing documents:", documents);
+    console.log("Analyzing text input:", textInput);
+
     // Placeholder data
     setTimeline([
       { date: '2022-01-01', event: 'Lease signed' },
@@ -35,6 +49,7 @@ const Index = () => {
       evidence: ['Rent increase exceeds legal limit', 'Multiple frivolous eviction attempts'],
       suggestions: ['File motion for rent rollback', 'Document all communication with landlord'],
     });
+    setError('');
   };
 
   return (
@@ -47,8 +62,24 @@ const Index = () => {
           <CardDescription>Upload legal documents or paste text for analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <Input type="file" onChange={handleFileUpload} className="mb-4" />
-          <Textarea placeholder="Or paste document text here..." onChange={handleTextInput} className="mb-4" />
+          <Input type="file" accept=".pdf" onChange={handleFileUpload} className="mb-4" />
+          {documents.length > 0 && (
+            <div className="mb-4">
+              <h3 className="font-semibold">Uploaded Files:</h3>
+              <ul className="list-disc pl-5">
+                {documents.map((doc, index) => (
+                  <li key={index}>{doc.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <Textarea 
+            placeholder="Or paste document text here..." 
+            onChange={handleTextInput}
+            value={textInput}
+            className="mb-4" 
+          />
+          {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
         </CardContent>
         <CardFooter>
           <Button onClick={handleAnalyze}>Analyze Documents</Button>
